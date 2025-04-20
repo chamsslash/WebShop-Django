@@ -1,0 +1,32 @@
+{% load static %}
+
+{% for product in products %}
+    <!-- Привязываем обработчик клика ко всей карточке, кроме кнопки "Добавить в корзину" -->
+    <div class="product-card {% if product.event %}limited-style{% endif %}" onclick="openModal({{ product.id }})">
+        
+        {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+        {% else %}
+            <img src="{% static 'images/test.png' %}" class="card-img-top" alt="{{ product.name }}">
+        {% endif %}
+        
+        <h3>
+            {% autoescape off %}
+            {% if product.headline %}
+                {{ product.headline }}
+            {% else %}
+                {{ product.name }}
+            {% endif %}
+            {% endautoescape %}
+        </h3>
+        
+        <p>{{ product.price }}</p>
+        
+        <!-- Кнопка "Добавить в корзину", которая НЕ вызывает openModal -->
+        <button class="add-to-cart-btn" data-product-id="{{ product.id }}">Добавить в корзину</button>
+        
+        {% if product.event %}
+            <h3>LIMITED</h3>
+        {% endif %}
+    </div>
+{% endfor %}

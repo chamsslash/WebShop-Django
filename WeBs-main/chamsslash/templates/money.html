@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заработать денег</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/money/money.css' %}">
+    <script>
+        let clickCount = {{user.money}};
+
+        async function handleClick() {
+            clickCount += 1;
+
+            // Обновляем счётчик кликов на странице
+            const counterElement = document.getElementById('click-counter');
+            counterElement.innerText = `Ваши клики: ${clickCount}`;
+
+            // Отправляем запрос в базу данных каждые 10 кликов
+            if (clickCount % 10 === 0) {
+                try {
+                    const response = await fetch("{% url 'main:update_money' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCookie("csrftoken")
+                        },
+                        body: JSON.stringify({ clicks: clickCount })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        pass
+                    } else {
+                        alert("Ошибка обновления баланса. Попробуйте позже.");
+                    }
+                } catch (error) {
+                    console.error("Ошибка:", error);
+                }
+            }
+        }
+
+        // Получение CSRF-токена для отправки POST-запросов
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === name + "=") {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+
+            <div class="top-tabs">
+                <ul class="top-links">
+                    <a href="{% url 'main:product_list' %}"class="tab">Главная</a>
+                    <a href="{% url 'main:about' %}"class="tab">О нас</a>
+                    <a href="#"class="tab">Телеграмм бот</a></li>
+                    <a href="{% url 'main:inventory' %}"class="tab">Инвентарь</a>
+                  
+                  
+                  
+                </ul>
+              
+            </div>
+            <a href="{% url "user:profile" %}" class="name-link login-btn">{{user.username}}</a> <!-- Ссылка для имени, размещена в правом углу -->
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h2>Заработать денег?</h2>
+            <h2 id="click-counter">Ваши клики: {{user.money}}</h2>
+            
+            <button class="btn-raise-money" onclick="handleClick()">Заработать</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 У меня нет прав</p>
+    </footer>
+</body>
+</html>

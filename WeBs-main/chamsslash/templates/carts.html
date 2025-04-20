@@ -1,0 +1,265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя корзина</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/cart/cart.css' %}">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Функция для обновления количества товара
+            window.updateQuantity = async function(cartItemId, action) {
+                try {
+                    const csrftoken = getCookie('csrftoken');
+                    if (!csrftoken) {
+                        throw new Error("CSRF токен не найден");
+                    }
+        
+                    console.log("Отправка запроса для изменения количества, ID товара:", cartItemId, "Действие:", action);
+        
+                    const response = await fetch("{% url 'cart:update_quantity' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": csrftoken
+                        },
+                        body: JSON.stringify({
+                            cart_item_id: cartItemId,
+                            action: action
+                        })
+                    });
+        
+                    console.log("Ответ от сервера:", response);
+        
+                    const data = await response.json();
+                    console.log("Обработанные данные ответа:", data);
+        
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Network response was not ok');
+                    }
+        
+                    if (data.success) {
+                        // Обновляем количество товара в DOM
+                        const quantityElement = document.getElementById(`quantity-${cartItemId}`);
+                        if (quantityElement) {
+                            quantityElement.innerText = data.new_quantity;
+                        }
+                        
+                        // Обновляем общую цену товара в DOM
+                        const itemTotalPriceElement = document.getElementById(`item-total-price-${cartItemId}`);
+                        if (itemTotalPriceElement) {
+                            const itemTotalPrice = parseFloat(data.item_total_price) || 0;
+                            itemTotalPriceElement.innerText = `${itemTotalPrice.toFixed(2)} ₽`;
+                        }
+        
+                        // Обновляем общую сумму всех товаров в корзине
+                        const totalPriceElement = document.getElementById('total-price');
+                        if (totalPriceElement) {
+                            const totalPrice = parseFloat(data.total_price) || 0;
+                            totalPriceElement.innerText = `${totalPrice.toFixed(2)} ₽`;
+                        }
+        
+                        // Удаляем товар, если количество стало 0
+                        if (data.new_quantity === 0) {
+                            const cartItemElement = document.getElementById(`cart-item-${cartItemId}`);
+                            if (cartItemElement) {
+                                cartItemElement.remove();
+                            }
+                        }
+                    } else {
+                        alert("Ошибка: " + data.error);
+                    }
+                } catch (error) {
+                    console.error("Ошибка при обновлении количества:", error);
+                    alert("Произошла ошибка при обновлении количества товара. Попробуйте позже. Ошибка: " + error.message);
+                }
+            };
+        
+            // Функция для удаления товара из корзины
+            window.removeFromCart = async function(cartItemId) {
+                try {
+                    const csrftoken = getCookie('csrftoken');
+                    if (!csrftoken) {
+                        throw new Error("CSRF токен не найден");
+                    }
+        
+                    console.log("Отправка запроса для удаления товара, ID товара:", cartItemId);
+        
+                    const response = await fetch("{% url 'cart:remove_from_cart' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": csrftoken
+                        },
+                        body: JSON.stringify({
+                            cart_item_id: cartItemId
+                        })
+                    });
+        
+                    console.log("Ответ от сервера на удаление:", response);
+        
+                    const data = await response.json();
+                    console.log("Обработанные данные ответа:", data);
+        
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Network response was not ok');
+                    }
+        
+                    if (data.success) {
+                        // Удаляем элемент из DOM
+                        const cartItemElement = document.getElementById(`cart-item-${cartItemId}`);
+                        if (cartItemElement) {
+                            cartItemElement.remove();
+                        }
+        
+                        // Обновляем общую сумму всех товаров в корзине
+                        const totalPriceElement = document.getElementById('total-price');
+                        if (totalPriceElement) {
+                            const totalPrice = parseFloat(data.total_price) || 0;
+                            totalPriceElement.innerText = `${totalPrice.toFixed(2)} ₽`;
+                        }
+                    } else {
+                        alert("Ошибка: " + data.error);
+                    }
+                } catch (error) {
+                    console.error("Ошибка при удалении товара:", error);
+                    alert("Произошла ошибка при удалении товара из корзины. Попробуйте позже. Ошибка: " + error.message);
+                }
+            };
+        
+            // Функция для получения CSRF токена
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+        
+        
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            
+            <div class="top-tabs">
+                <ul class="top-links">
+                    <a href="{% url 'main:product_list' %}"class="tab">Главная</a>
+                    <a href="{% url 'main:about' %}"class="tab">О нас</a>
+                    <a href="{% url 'main:inventory' %}"class="tab">Инвентарь</a>
+                    <a href="{% url 'main:money' %}"class="tab">Заработать</a>
+                  
+                  
+                  
+                </ul>
+            <div class="user-info">
+                <span class="login-btn">{{ user.username }}</span>
+            </div>
+        </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="cart-container">
+            <h2>Ваша корзина</h2>
+            <div class="cart-items">
+                {% for item in cart_items %}
+                
+                <div class="cart-item{% if item.product.event %} event{% endif %}" id="cart-item-{{ item.id }}">
+                    <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/test.png' %}{% endif %}" alt="{{ item.product.name }}">
+                    <div class="cart-item-info">
+                        {% if item.product.event %}<h3>LIMITED</h3>{% endif %}
+                        <h3>{{ item.product.name }}</h3>
+                        <p>Цена за единицу: {{ item.product.price }} ₽</p>
+                        <p>Количество: <span id="quantity-{{ item.id }}">{{ item.quantity }}</span></p>
+                        <p>Общая цена: 
+                            <span id="item-total-price-{{ item.id }}">
+                                {{item.total_price}} ₽
+                            </span>
+                        </p>
+                            <button onclick="updateQuantity({{ item.id }}, 'increase')">+</button>
+                            <button onclick="updateQuantity({{ item.id }}, 'decrease')">-</button>
+                        </div>
+                        <button class="remove-item" onclick="removeFromCart({{ item.id }})">Удалить</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="total">
+                <p>Общая сумма: <span id="total-price">{{ total_price }} ₽</span></p>
+            </div>
+            <button class="btn-order">Заказать</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Все права защищены</p>
+    </footer>
+    <script> 
+        document.addEventListener("DOMContentLoaded", function () {
+            const orderButton = document.querySelector(".btn-order");
+            if (orderButton) {
+                orderButton.addEventListener("click", async function () {
+                    try {
+                        const csrftoken = getCookie("csrftoken");
+                        if (!csrftoken) {
+                            throw new Error("CSRF токен не найден");
+                        }
+        
+                        const response = await fetch("{% url 'cart:order' %}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": csrftoken
+                            },
+                            body: JSON.stringify({})
+                        });
+        
+                        const data = await response.json();
+        
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.error || "Ошибка при обработке заказа");
+                        }
+        
+                        alert(data.message);
+                        window.location.reload(); // Обновляем страницу или перенаправляем
+                    } catch (error) {
+                        console.error("Ошибка при оформлении заказа:", error);
+                        alert("Произошла ошибка при оформлении заказа. Попробуйте позже.");
+                    }
+                });
+            }
+        
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== "") {
+                    const cookies = document.cookie.split(";");
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === name + "=") {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+        
+        
+        
+    </script>
+</body>
+
+</html> 

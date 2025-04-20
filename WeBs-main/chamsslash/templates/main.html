@@ -1,0 +1,326 @@
+{% load static %}
+{% load products_tag %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyShop</title>
+    <link rel="stylesheet" href="{% static 'styles/main/main.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/main/dop.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/inventory/inventorycard.css' %}">
+</head>
+<body>
+    <!-- Верхний блок с вкладками -->
+    <div class="top-tabs">
+        <div class="logo">
+            <img src="{% static 'images/bebe.jpg' %}" alt="Логотип" class="logo-img">
+            <h1> Магазин </h1>
+        </div>
+        <div class="top-links">
+            <a href="{% url 'main:about' %}" class="tab">О нас</a>
+            <a href="{% url 'main:money' %}" class="tab">Заработать</a>
+            <a href="telegram-bot.html" class="tab">Телеграм бот</a>
+            <a href="{% url 'main:inventory' %}" class="tab">Инвентарь</a>
+        </div>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'user:login' %}" class="login-btn">Войти в аккаунт</a>
+        {% else %}
+            <a href="{% url 'user:profile' %}" class="login-btn">Профиль</a>
+        {% endif %}
+    </div>
+
+    <!-- Шапка сайта -->
+    <header>
+        <div class="search-cart-row">
+            <div class="search-bar">
+                <form action="" method="get" class="search-form" id="filter-form">
+                    {% csrf_token %}
+                    <input type="search" name="q" placeholder="Поиск товаров..." id="search" value="{{ q }}">
+                    <select name="category" class="category-select">
+                        <option value="">Все категории</option>
+                        {% tag_categories as categories %}
+                        {% for category_item in categories %}
+                            <option value="{{ category_item.slug }}" {% if category == category_item.slug %}selected{% endif %}>
+                                {{ category_item.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="sort-buttons">
+                        <input type="hidden" name="order_by" id="order_by" value="{{ order_by }}">
+                        <button type="button" class="sort-button {% if order_by == 'price' %}active{% endif %}" data-value="price">
+                            От дешевых к дорогим
+                        </button>
+                        <button type="button" class="sort-button {% if order_by == '-price' %}active{% endif %}" data-value="-price">
+                            От дорогих к дешевым
+                        </button>
+                        <button type="button" class="sort-button {% if order_by == 'event' %}active{% endif %}" data-value="event">
+                            Лимитированно
+                        </button>
+                    </div>
+                    <button type="submit" class="apply-button">Применить</button>
+                </form>
+            </div>
+            <div class="cart">
+                <a href="{% url 'cart:cartsee' %}">Корзина <span id="cart-count">{{ cart_count }}</span></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Список товаров -->
+    <main class="products">
+        <h2>Товары</h2>
+        <div class="product-list" id="product-list">
+            {% for product in products %}
+                <div class="product-card {% if product.event %}limited-style{% endif %}" id="item-{{ product.id }}">
+                    <div class="product-content">
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        <h3 class="product-name">
+                            {% autoescape off %}
+                            {% if product.headline %}
+                                {{ product.headline }}
+                            {% else %}
+                                {{ product.name }}
+                            {% endif %}
+                            {% endautoescape %}
+                        </h3>
+                        <p class="product-description">{{ product.description }}</p>
+                        <p>{{ product.price }}</p>
+                    </div>
+                    <button class="add-to-cart-btn" data-product-id="{{ product.id }}">Добавить в корзину</button>
+                    {% if product.event %}
+                        <h3>LIMITED</h3>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Пагинация -->
+    <div class="pagination" id="pagination">
+        {% include 'pagination_partial.html' %}
+    </div>
+
+    <!-- Футер -->
+    <footer>
+        <p>&copy; 2024 а не 2025</p>
+    </footer>
+
+    <!-- Модальное окно для полного отображения информации о товаре -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modal-title">Название товара</h2>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" src="" alt="Фото товара">
+                <p id="modal-description">Описание товара</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Скрипт -->
+    <script>
+        // Флаги для контроля состояния запросов
+        let isProcessing = false; // Флаг для контроля состояния запросов
+        let currentRequest = null; // Хранение текущего запроса
+        let debounceTimeout = null; // Таймаут для предотвращения частых запросов
+    
+        // Получение CSRF-токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+    
+        // Настройка глобальных AJAX настроек для включения CSRF-токена
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^((GET|HEAD|OPTIONS|TRACE)$)/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+    
+        $(document).ready(function() {
+            console.log("Документ загружен. Инициализация событий.");
+    
+            // Делегирование событий для открытия модального окна по клику на карточку товара
+            $(document).on('click', '.product-card', function(event) {
+                // Проверяем, не был ли клик совершен по кнопке "Добавить в корзину"
+                if (!$(event.target).hasClass('add-to-cart-btn')) {
+                    // Получаем ID товара из карточки
+                    const itemId = $(this).attr('id').split('-')[1];
+                    openModal(itemId);
+                }
+            });
+    
+            // Функция для открытия модального окна
+            window.openModal = function(itemId) {
+                const modal = document.getElementById('modal');
+                const modalTitle = document.getElementById('modal-title');
+                const modalImage = document.getElementById('modal-image');
+                const modalDescription = document.getElementById('modal-description');
+    
+                const item = document.getElementById('item-' + itemId);
+                const productName = item.querySelector('.product-name').textContent;
+                const productImage = item.querySelector('img').src;
+                const productDescription = item.querySelector('.product-description').textContent;
+    
+                modalTitle.textContent = productName;
+                modalImage.src = productImage;
+                modalDescription.textContent = productDescription;
+    
+                modal.style.display = "flex";
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 10);
+            }
+    
+            // Функция для закрытия модального окна
+            window.closeModal = function() {
+                const modal = document.getElementById('modal');
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = "none";
+                }, 300); // Время для анимации
+            }
+    
+            // Делегирование событий для сортировки
+            $(document).on('click', '.sort-button', function() {
+                const $button = $(this);
+    
+                if ($button.hasClass('active')) {
+                    // Если кнопка уже активна, сбросить сортировку
+                    console.log("Сброс сортировки");
+                    $button.removeClass('active');
+                    $('#order_by').val(''); // Сбрасываем значение сортировки
+                } else {
+                    // Установить новую сортировку
+                    console.log("Установка новой сортировки:", $button.data('value'));
+                    $button.addClass('active');
+                    $('#order_by').val($button.data('value'));
+                }
+    
+                submitForm();
+            });
+    
+            // Обработка отправки формы фильтрации
+            $(document).on('submit', '#filter-form', function(e) {
+                e.preventDefault();
+                console.log("Форма фильтрации отправлена.");
+                submitForm();
+            });
+    
+            // Делегирование событий для пагинации
+            $(document).on('click', '.pagination a.page-button:not(.disabled)', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                console.log("Клик по пагинации. Переход на страницу:", page);
+                if (page) {
+                    submitForm(page);
+                }
+            });
+    
+            // Делегирование событий для кнопок "Добавить в корзину"
+            $(document).on('click', '.add-to-cart-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Останавливаем всплытие события, чтобы клик не вызывал открытие модального окна
+                const productId = $(this).data('product-id');
+                console.log("Клик по кнопке добавления в корзину для продукта ID:", productId);
+                addToCart(productId);
+            });
+    
+            // Функция для отправки POST-запроса (например, добавление в корзину)
+            function addToCart(productId) {
+                console.log("Отправка POST-запроса для добавления продукта ID:", productId);
+                $.ajax({
+                    url: "{% url 'cart:add' %}", // Убедитесь, что этот URL настроен в ваших urls.py
+                    type: 'POST',
+                    data: JSON.stringify({ product_id: productId }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            console.log("Товар добавлен в корзину:", response);
+                            // Обновите счётчик корзины, если он возвращается в ответе
+                            if (response.cart_count !== undefined) {
+                                $('#cart-count').text(response.cart_count);
+                            }
+                        } else {
+                            console.error("Ошибка добавления в корзину:", response.error);
+                            alert("Произошла ошибка: " + response.error);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(`Ошибка при добавлении в корзину: ${status} - ${error}`);
+                        alert("Произошла ошибка при добавлении товара в корзину.");
+                    }
+                });
+            }
+    
+            // AJAX-запрос для сортировки и фильтрации
+            function submitForm(page) {
+                if (isProcessing) {
+                    console.log("Запрос уже выполняется. Ожидайте.");
+                    return;
+                }
+    
+                clearTimeout(debounceTimeout);
+    
+                debounceTimeout = setTimeout(function() {
+                    if (currentRequest) {
+                        console.log("Отмена предыдущего запроса.");
+                        currentRequest.abort();
+                    }
+    
+                    isProcessing = true;
+                    const formData = $('#filter-form').serializeArray();
+                    if (page) {
+                        formData.push({ name: 'page', value: page });
+                    }
+    
+                    console.log("Отправка нового AJAX-запроса с данными:", formData);
+    
+                    currentRequest = $.ajax({
+                        url: "{% url 'main:product_list' %}",
+                        type: 'GET',
+                        data: formData,
+                        dataType: 'json',
+                        success: function(data) {
+                            console.log("Успешный AJAX-ответ:", data);
+                            $('#product-list').html(data.products_html);
+                            $('#pagination').html(data.pagination_html);
+                            $('html, body').animate({ scrollTop: $('.products').offset().top }, 500);
+                        },
+                        error: function(xhr, status, error) {
+                            if (status !== "abort") {
+                                console.error(`Ошибка AJAX: ${status} - ${error}`);
+                                alert("Произошла ошибка при загрузке данных.");
+                            }
+                        },
+                        complete: function() {
+                            isProcessing = false;
+                            currentRequest = null;
+                        }
+                    });
+                }, 300); // Таймаут перед отправкой
+            }
+        });
+    </script>
+    
+</body>
+</html>

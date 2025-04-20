@@ -1,0 +1,142 @@
+<!-- your_app_name/templates/registration.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/registration/registration.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+           <div class="top-tabs">
+        <ul class="top-links">
+          <a href="{% url 'main:product_list' %}" class="tab">Главная</a>
+          <a href="{% url 'main:about' %}" class="tab">О нас</a>
+          <a href="#services" class="tab">Телеграмм бот</a>
+          <a href="{% url 'main:money' %}" class="tab">Заработать</a>
+          
+          
+        </ul>
+      
+    </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="form-container">
+            <h2>Форма регистрации</h2>
+            <form action="{% url 'user:registration' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Отображение ошибок формы -->
+                {% if form.errors %}
+                    <div class="form-errors">
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <!-- Изображение профиля -->
+                <div class="image-upload-container">
+                    <div class="image-preview" id="image-preview"></div>
+                    <label for="{{ form.image.id_for_label }}">Загрузить изображение</label>
+                    {{ form.image }}
+                </div>
+
+                <!-- Поля формы -->
+                
+                <div class="input-group">
+                    <label for="{{ form.first_name.id_for_label }}">Имя</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="input-group">
+                    <label for="{{ form.last_name.id_for_label }}">Фамилия</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="input-group">
+                    <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+                    {{ form.username }}
+                </div>
+                <div class="input-group">
+                    <label for="{{ form.email.id_for_label }}">Почта</label>
+                    {{ form.email }}
+                </div>
+                <div class="input-group">
+                    <label for="{{ form.password1.id_for_label }}">Пароль</label>
+                    <div class="password-container">
+                        {{ form.password1 }}
+                        <span class="eye-icon" onclick="togglePasswordVisibility()">👁️</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="{{ form.password2.id_for_label }}">Подтверждение пароля</label>
+                    <div class="password-container">
+                        {{ form.password2 }}
+                        <span class="eye-icon" onclick="togglePasswordVisibility()">👁️</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Зарегистрироваться</button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 У меня нет прав</p>
+    </footer>
+
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById('image-preview');
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.style.backgroundImage = `url(${e.target.result})`;
+                preview.style.backgroundSize = 'cover';
+                preview.style.backgroundPosition = 'center';
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function togglePasswordVisibility() {
+            const passwordContainers = document.querySelectorAll('.password-container');
+            passwordContainers.forEach(container => {
+                const passwordField = container.querySelector('input');
+                const eyeIcon = container.querySelector('.eye-icon');
+
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    eyeIcon.textContent = '🙈'; // Закрытый глаз
+                } else {
+                    passwordField.type = 'password';
+                    eyeIcon.textContent = '👁️'; // Открытый глаз
+                }
+            });
+        }
+
+        // Обработчик изменения файла для изображения профиля
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+            if (imageInput) {
+                imageInput.addEventListener('change', previewImage);
+            }
+        });
+    </script>
+</body>
+</html>

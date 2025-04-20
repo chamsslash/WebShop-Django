@@ -1,0 +1,114 @@
+/* Скрытая форма */
+.hidden-form {
+    display: none;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  
+  .hidden-form.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Кнопки */
+  .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-edit {
+    background-color: #007acc;
+    color: white;
+  }
+  
+  .btn-cancel {
+    background-color: #ffc107;
+    color: white;
+  }
+  
+  .btn-submit {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Анимации */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .fade-in {
+    animation: fade-in 1s ease-out;
+  }
+  .image-upload-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.image-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px; /* Отступ под картинкой */
+    background-color: #f0f8ff; /* Цвет фона, если изображение не выбрано */
+    border: 2px solid #007acc;
+    display: inline-block;
+    background-image: url('default-image.jpg'); /* Замените на путь к изображению по умолчанию */
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+label {
+    display: block;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+select,
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="file"] {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+select:focus,
+input[type="password"]:focus {
+    border-color: #007acc; /* Синий при фокусе */
+}
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}

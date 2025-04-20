@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль</title>
+  <link rel="stylesheet" href="{% static 'styles/profile/profile.css' %}">
+  <link rel="stylesheet" href="{% static 'styles/profile/form.css' %}">
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="top-tabs">
+        <ul class="top-links">
+          <a href="{% url 'main:product_list' %}" class="tab">Главная</a>
+          <a href="{% url 'main:about' %}" class="tab">О нас</a>
+          <a href="#services" class="tab">Телеграмм бот</a>
+          <a href="{% url 'main:money' %}" class="tab">Заработать</a>
+          
+          
+          
+        </ul>
+      
+    </div>
+    </nav>
+  </header>
+
+  <main>
+    <section id="profile">
+      {% if user.is_authenticated %}
+      <div class="profile-container">
+        <h1 class="profile-title">Профиль</h1>
+        <div class="profile-card">
+          <!-- Информация о пользователе -->
+          <div id="profile-info" class="profile-header">
+            <img src="{% if user.image %}{{ user.image.url }}{% else %}{% static 'default-profile-pic.jpg' %}{% endif %}" 
+                 alt="Фото профиля" class="profile-pic fade-in">
+            <div class="profile-info">
+              <h2 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h2>
+              <p class="profile-detail">Username: {{ user.username }}</p>
+              <p class="profile-detail">Email: {{ user.email }}</p>
+              <p class="profile-detail">Дата регистрации: {{ user.date_joined|date:"d.m.Y" }}</p>
+              <p class="profile-detail">Статус: Активен</p>
+            </div>
+          </div>
+
+          <!-- Форма редактирования -->
+  
+           
+            <!-- Поля формы -->
+          <form id="edit-profile-form" method="post" enctype="multipart/form-data" class="hidden-form">
+            {% csrf_token %}
+            <div class="image-upload-container">
+              <div class="image-preview" id="image-preview"></div>
+              <label for="{{ form.image.id_for_label }}">Загрузить изображение</label>
+              {{ form.image }}
+          </div>
+            <div class="input-group">
+              <label for="{{ form.first_name.id_for_label }}">Имя</label>
+              {{ form.first_name }}
+          </div>
+          <div class="input-group">
+              <label for="{{ form.last_name.id_for_label }}">Фамилия</label>
+              {{ form.last_name }}
+          </div>
+          <div class="input-group">
+              <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+              {{ form.username }}
+          </div>
+          <div class="input-group">
+              <label for="{{ form.email.id_for_label }}">Почта</label>
+              {{ form.email }}
+          </div>
+          <div class="input-group">
+              <label for="{{ form.password1.id_for_label }}">Пароль</label>
+              <div class="password-container">
+                  {{ form.password }}
+                  <span class="eye-icon" onclick="togglePasswordVisibility()">👁️</span>
+              </div>
+          </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-submit glow-effect">Сохранить изменения</button>
+              <button type="button" class="btn btn-cancel glow-effect" onclick="toggleEditForm()">Отмена</button>
+            </div>
+          </form>
+
+          <!-- Кнопки действий -->
+          <div class="profile-actions">
+            <button class="btn btn-edit glow-effect" onclick="toggleEditForm()">Редактировать</button>
+            <a href="{% url 'user:logout' %}" class="btn btn-logout glow-effect">Выйти</a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="profile-container">
+        <h1 class="profile-title">Вы не авторизованы</h1>
+        <p class="profile-detail"><a href="{% url 'login' %}">Войдите</a>, чтобы просмотреть свой профиль.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 У меня нет прав</p>
+  </footer>
+  <script>
+    function previewImage(event) {
+        const preview = document.getElementById('image-preview');
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            preview.style.backgroundImage = `url(${e.target.result})`;
+            preview.style.backgroundSize = 'cover';
+            preview.style.backgroundPosition = 'center';
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function togglePasswordVisibility() {
+        const passwordContainers = document.querySelectorAll('.password-container');
+        passwordContainers.forEach(container => {
+            const passwordField = container.querySelector('input');
+            const eyeIcon = container.querySelector('.eye-icon');
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.textContent = '🙈'; // Закрытый глаз
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.textContent = '👁️'; // Открытый глаз
+            }
+        });
+    }
+
+</script>
+<script>
+  function toggleEditForm() {
+      const form = document.getElementById('edit-profile-form');
+      const info = document.getElementById('profile-info');
+      if (form.classList.contains('visible')) {
+          form.classList.remove('visible');
+          info.style.display = 'block';
+      } else {
+          form.classList.add('visible');
+          info.style.display = 'none';
+      }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+    if (imageInput) {
+        imageInput.addEventListener('change', previewImage);
+    }
+});
+
+</script>
+</body>
+</html>

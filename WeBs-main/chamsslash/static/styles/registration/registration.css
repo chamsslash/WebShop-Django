@@ -1,0 +1,310 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: #f0f8ff; /* Светло-синий фон */
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    background-color: #007acc; /* Синий цвет для шапки */
+    padding: 20px 0;
+    animation: fadeIn 1s ease-in-out;
+}
+
+nav ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 20px;
+    position: relative;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: #ffd700; /* Золотистый при наведении */
+    transform: scale(1.1);
+}
+
+nav ul li::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #ffd700;
+    transform: scaleX(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+nav ul li:hover::after {
+    transform: scaleX(1);
+}
+
+main {
+    padding: 40px 20px;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    animation: slideUp 1s ease-in-out;
+}
+
+h2 {
+    color: #007acc; /* Синий цвет для заголовка */
+    margin-bottom: 20px;
+    text-align: center;
+    animation: fadeInUp 1s ease-out;
+}
+
+.image-upload-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.image-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px; /* Отступ под картинкой */
+    background-color: #f0f8ff; /* Цвет фона, если изображение не выбрано */
+    border: 2px solid #007acc;
+    display: inline-block;
+    background-image: url('default-image.jpg'); /* Замените на путь к изображению по умолчанию */
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+label {
+    display: block;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+select,
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="file"] {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+select:focus,
+input[type="password"]:focus {
+    border-color: #007acc; /* Синий при фокусе */
+}
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.eye-icon:hover {
+    transform: scale(1.2);
+}
+
+button {
+    background-color: #007acc; /* Синий фон для кнопки */
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: 2px solid #007acc;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #005f99; /* Темно-синий при наведении */
+    transform: scale(1.05);
+}
+
+footer {
+    background-color: #007acc; /* Синий футер */
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+footer p {
+    font-size: 14px;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+button.btn-submit {
+    font-size: 18px;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px; /* Добавляем отступ сверху */
+}
+
+button.btn-submit:hover {
+    
+    color: #fff;
+    transform: scale(1.1);
+}
+header  a {
+    margin: 3px;
+  }
+  .top-links {
+    display: flex;
+    gap: 30px;
+    margin-left: 80px; /* Сдвигаем левее */
+    align-items: center;
+  }
+  
+  /* Стили для навигационных кнопок */
+  .top-links .tab {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 12px 20px;
+    border-radius: 25px;
+    background-color: #005f99;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+  }
+  
+  .top-links .tab::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.5), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  .top-links .tab:hover::before {
+    left: 100%;
+  }
+  
+  .top-links .tab:hover {
+    background-color: #ffd700;
+    color: #005f99;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+  }
+  .top-links {
+    display: flex;
+    gap: 30px;
+    margin-left: 80px; /* Сдвигаем левее */
+    align-items: center;
+  }
+  
+  /* Стили для навигационных кнопок */
+  .top-links .tab {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 12px 20px;
+    border-radius: 25px;
+    background-color: #005f99;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+  }
+  
+  .top-links .tab::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.5), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  .top-links .tab:hover::before {
+    left: 100%;
+  }
+  
+  .top-links .tab:hover {
+    background-color: #ffd700;
+    color: #005f99;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+  }

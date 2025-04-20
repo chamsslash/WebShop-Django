@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в аккаунт</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/login/login.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="top-tabs">
+                <ul class="top-links">
+                  <a href="{% url 'main:product_list' %}" class="tab">Главная</a>
+                  <a href="{% url 'main:about' %}" class="tab">О нас</a>
+                  <a href="#services" class="tab">Телеграмм бот</a>
+                  <a href="{% url 'user:registration' %}" class="tab">Зарегистрироваться</a>
+                  
+                  
+                  
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="form-container">
+            <h2>Вход в аккаунт</h2>
+            <form action="{% url 'users:login' %}" method="post">
+                {% csrf_token %}
+                <!-- Поля формы -->
+                <div class="input-group">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                </div>
+                <div class="input-group">
+                    {{ form.password.label_tag }}
+                    <div class="password-container">
+                        {{ form.password }}
+                        <span class="eye-icon" onclick="togglePasswordVisibility()">👁️</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">Войти

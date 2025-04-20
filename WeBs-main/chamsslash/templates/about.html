@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мой сайт</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'styles/about/about.css' %}">
+</head>
+<body>
+  <header>
+    <nav>
+            
+      <div class="top-tabs">
+          <ul class="top-links">
+              <a href="{% url 'main:product_list' %}"class="tab">Главная</a>
+              <a href="{% url 'main:inventory' %}" class="tab">Инвентарь</a></li>
+              <a href="#"class="tab">Телеграмм бот</a>
+              <a href="{% url 'main:money' %}"class="tab">Заработать</a>
+            
+            
+            
+        
+      
+          <a href="{% url "user:profile" %}" class="login-btn">{{user.username}}</a> <!-- Ссылка для имени, размещена в правом углу -->
+        </ul>
+  </div>
+  </nav>
+  </header>
+
+  <main>
+    <section id="about">
+      <div class="about-container">
+        <h1>О нас</h1>
+        <div class="about-card">
+          <h2>Мы - команда профессионалов</h2>
+          <p>Наши специалисты обладают уникальными навыками и опытом для решения самых сложных задач. Мы гарантируем высокий результат и надежность.</p>
+          <p>Свяжитесь с нами, чтобы узнать больше!</p>
+          <button class="btn-contact">Связаться с нами</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 У меня нет прав</p>
+  </footer>
+</body>
+</html>

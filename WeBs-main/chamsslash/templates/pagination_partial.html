@@ -1,0 +1,26 @@
+<!-- pagination_partial.html -->
+{% if is_paginated %}
+    <div class="pagination-links">
+        {% if page_obj.has_previous %}
+            <a href="#" class="page-button" data-page="{{ page_obj.previous_page_number }}">Предыдущая</a>
+        {% else %}
+            <a href="#" class="page-button disabled">Предыдущая</a>
+        {% endif %}
+
+        {% for page_num in paginator.page_range %}
+            {% if page_num >= page_obj.number|add:-2 and page_num <= page_obj.number|add:2 %}
+                {% if page_obj.number == page_num %}
+                    <a href="#" class="page-button active" data-page="{{ page_num }}">{{ page_num }}</a>
+                {% else %}
+                    <a href="#" class="page-button" data-page="{{ page_num }}">{{ page_num }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="#" class="page-button" data-page="{{ page_obj.next_page_number }}">Следующая</a>
+        {% else %}
+            <a href="#" class="page-button disabled">Следующая</a>
+        {% endif %}
+    </div>
+{% endif %}

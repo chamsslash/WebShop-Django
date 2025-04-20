@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Инвентарь</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/inventory/inventory.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/inventory/inventorycard.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="top-tabs">
+                <ul class="top-links">
+                    <a href="{% url 'main:product_list' %}" class="tab">Главная</a>
+                    <a href="{% url 'main:about' %}" class="tab">О нас</a>
+                    <a href="{% url 'cart:cartsee' %}" class="tab">Корзина</a>
+                    <a href="{% url 'main:money' %}" class="tab">Заработать</a>
+                </ul>
+                <div class="user-info">
+                    <a href="{% url "user:profile" %}" class="login-btn">{{ user.username }}</a> <!-- Ссылка для имени, размещена в правом углу -->
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="inventory-container">
+            <h2>Ваш инвентарь</h2>
+
+            <!-- Поисковая строка -->
+            <div class="search-container">
+                <input type="text" id="search" class="search-input" placeholder="Поиск товара..." onkeyup="searchInventory()">
+            </div>
+
+            <!-- Список товаров -->
+            <div id="inventory-items" class="inventory-items">
+                {% if inventory_items %}
+                    {% for item in inventory_items %}
+                        <div class="inventory-item" id="item-{{ item.id }}">
+                            <img src="{% if item.product.image %}{{ item.product.image.url}}{% endif %}" alt="{{ item.product.name }}">
+                            <div class="inventory-item-info">
+                                <h3 class="product-name">{{ item.product.name }}</h3>
+                                <p>Количество: {{ item.quantity }}</p>
+                                <p class="product-description">{{ item.product.description|default:"Описание отсутствует" }}</p>
+                                <button class="btn-view" onclick="openModal({{ item.id }})">Посмотреть</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Ваш инвентарь пуст.</p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 У меня нет прав</p>
+    </footer>
+
+    <!-- Модальное окно для полного отображения информации о товаре -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modal-title">Название товара</h2>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" src="" alt="Фото товара">
+                <p id="modal-description">Описание товара</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Открытие модального окна
+        function openModal(itemId) {
+            // Находим элементы модального окна
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalImage = document.getElementById('modal-image');
+            const modalDescription = document.getElementById('modal-description');
+            
+            // Получаем данные товара по ID
+            const item = document.getElementById('item-' + itemId);
+            const productName = item.querySelector('.product-name').textContent;
+            const productImage = item.querySelector('img').src;
+            const productDescription = item.querySelector('.product-description').textContent;
+
+            // Заполняем модальное окно данными
+            modalTitle.textContent = productName;
+            modalImage.src = productImage;
+            modalDescription.textContent = productDescription;
+
+            // Показываем модальное окно с анимацией
+            modal.style.display = "flex";
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        }
+
+        // Закрытие модального окна
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = "none";
+            }, 300); // Время для анимации
+        }
+        // Функция для поиска товаров
+        function searchInventory() {
+            const input = document.getElementById('search');
+            const filter = input.value.toLowerCase();
+            const items = document.getElementsByClassName('inventory-item');
+
+            // Перебираем все элементы и скрываем те, что не подходят под фильтр
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                const name = item.querySelector('.product-name').textContent.toLowerCase();
+                
+                if (name.includes(filter)) {
+                    item.style.display = "block"; // Показываем, если совпадает
+                } else {
+                    item.style.display = "none"; // Скрываем, если не совпадает
+                }
+            }
+        }
+        
+    </script>
+</body>
+</html>
