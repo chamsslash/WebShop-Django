@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/inventory/inventory.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/inventory/inventorycard.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="top-tabs">
+                <a href="{% url 'main:product_list' %}" class="tab">Главная</a>
+                <a href="{% url 'main:about' %}" class="tab">О нас</a>
+                <a href="{% url 'cart:cartsee' %}" class="tab">Корзина</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="inventory-item">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% endif %}
+            <div class="inventory-item-info">
+                <h2 class="product-name">{{ product.name }}</h2>
+                <p class="product-description">{{ description }}</p>
+                <p>Цена: {{ product.price }}</p>
+                <p>В наличии: {{ product.quantity }}</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -17,11 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import  path
 from carts import views
+from api import views as api_views
 app_name = 'carts'
 urlpatterns = [
     path('', views.cart_view.as_view(),name='cartsee'),
-    path('add/', views.add.as_view(),name='add'),
-    path('delete/', views.RemoveFromCartView.as_view(),name='remove_from_cart'),
-    path('update-quantity/', views.UpdateQuantityView.as_view(), name='update_quantity'),
-    path('order/', views.OrderCartView.as_view(), name='order'),
+    path('add/', api_views.CartAddView.as_view(),name='add'),
+    path('delete/', api_views.CartRemoveView.as_view(),name='remove_from_cart'),
+    path('update-quantity/', api_views.CartUpdateQuantityView.as_view(), name='update_quantity'),
+    path('order/', api_views.OrderView.as_view(), name='order'),
 ]

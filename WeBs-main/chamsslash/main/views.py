@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.generic import TemplateView
 from django.views.generic import DetailView, ListView
 from django.views import View
@@ -10,26 +10,7 @@ class money_view(TemplateView):
     template_name = 'money.html'
     from django.http import JsonResponse
 
-class UpdateMoneyView(LoginRequiredMixin, View):
-    """
-    Обрабатывает AJAX-запросы на обновление баланса пользователя.
-    """
-    def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({"success": False, "error": "Пользователь не авторизован"}, status=403)
-
-        try:
-            
-
-            # Логика обновления денег (10 единиц за каждые 10 кликов)
-            user = request.user
-            additional_money = 10
-            user.money += additional_money
-            user.save()
-
-            return JsonResponse({"success": True, "new_balance": user.money})
-        except Exception as e:#Exception хранит в себе код ошибки!потом мы его передаем в словарь 
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+# «Заработать» (update_money) — JSON-ручка в api/views.py: EarnMoneyView
 
 class about_view(TemplateView):
     template_name = 'about.html'
@@ -102,7 +83,7 @@ class product_view(DetailView):#у нее только паджинации не
     slug_url_kwarg = "product_slug"#кварг потому шо там еще может быть слаг какой нить
     #модель не надо мол сюда идет квери сет а ы просто вместо этого саи ручками выберем из продуктов нужный нам
     def get_object(self, queryset = None):#мы выбираем этот оин продукт не из кверисета
-        product = Products.objects.get(slug =  self.kwargs.slug_url_kwarg)
+        product = get_object_or_404(Products, slug=self.kwargs[self.slug_url_kwarg])
         #типо мы берем из всех обьектов где слаг такой то ,те ы уже точно знаем что это атрибут именно продуктов и не надо это указывать(просто пишем слаг а не Products.slug = блабла)
         return product
     #те там где та под капотом создется переменная в которую идет результат из метода get object (object =  get_object()) в нашем случае это будет равно object = product(которую мы переопр в методе)

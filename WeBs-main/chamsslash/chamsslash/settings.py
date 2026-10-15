@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-k+$dcnz2t#ramx866iv2+z&ge-(axt4fg)81ni=!i(b#o+3vou
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -40,9 +41,17 @@ INSTALLED_APPS = [
     'main',
     'users',
     'carts',
-    'debug_toolbar',
     'django_extensions',
+    'rest_framework',
+    'drf_spectacular',
+    'api',
 ]
+
+# Debug toolbar вставляет свою панель в каждую HTML-страницу — мешает вёрстке,
+# поэтому включается только явно: DEBUG_TOOLBAR=1 python manage.py runserver
+USE_DEBUG_TOOLBAR = os.environ.get('DEBUG_TOOLBAR') == '1'
+if USE_DEBUG_TOOLBAR:
+    INSTALLED_APPS.append('debug_toolbar')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -52,8 +61,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
+if USE_DEBUG_TOOLBAR:
+    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'chamsslash.urls'
 
@@ -79,16 +89,25 @@ WSGI_APPLICATION = 'chamsslash.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Используем PostgreSQL
-        'NAME': 'Webs',               # Имя вашей базы данных
-        'USER': 'bot',               # Имя пользователя PostgreSQL
-        'PASSWORD': 'bot',       # Пароль пользователя
-        'HOST': 'localhost',                        # Адрес базы данных (обычно localhost)
-        'PORT': '5432',                             # Порт PostgreSQL (по умолчанию 5432)
+# По умолчанию SQLite — ничего ставить не надо. Старый Postgres: USE_POSTGRES=1
+if os.environ.get('USE_POSTGRES') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'Webs',
+            'USER': 'bot',
+            'PASSWORD': 'bot',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_USER_MODEL = 'users.Userm'
 
@@ -141,3 +160,27 @@ INTERNAL_IPS = [
 LOGIN_REDIRECT_URL = '/user/profile'
 
 LOGIN_URL = '/user/login/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.SessionAuthentication'],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'WebShop API',
+    'DESCRIPTION': (
+        'API маркетплейса. Авторизация — сессионная cookie (`sessionid`). '
+        'Для POST нужен заголовок `X-CSRFToken` со значением cookie `csrftoken` '
+        '(получить: `GET /api/csrf/`). Корзина работает и без логина.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'PREPROCESSING_HOOKS': ['api.schema.only_api_paths'],
+}
+
+# Фронт на отдельном dev-сервере (Vite/CRA) через proxy — чтобы CSRF не ругался на Origin
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173', 'http://127.0.0.1:5173',
+    'http://localhost:3000', 'http://127.0.0.1:3000',
+]

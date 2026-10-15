@@ -12,24 +12,29 @@ Class-based views
     2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
 Including another URLconf
     1. Import the include() function: from django.urls import include, path
+from django.views.generic import RedirectView
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
 from django.conf.urls.static import static
 from chamsslash import settings
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='/main/', permanent=False)),
     path('admin/', admin.site.urls),
     path('main/', include('main.urls',namespace='main')),
     path('cart/', include('carts.urls',namespace='cart')),
     path('user/', include('users.urls',namespace='user')),
+    path('api/', include('api.urls')),
     
 
 ]
 if settings.DEBUG:
-    urlpatterns += [
-        path("__debug__/", include("debug_toolbar.urls")),
-    ]
+    if settings.USE_DEBUG_TOOLBAR:
+        urlpatterns += [
+            path("__debug__/", include("debug_toolbar.urls")),
+        ]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)#адрес на дебаг страницу
  

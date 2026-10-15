@@ -17,12 +17,13 @@ Including another URLconf
 
 from django.urls import include, path
 from  main import views
+from api import views as api_views
 
 app_name = 'main'
 urlpatterns = [
     path('', views.products_view.as_view(), name='product_list'),
     path('money/', views.money_view.as_view(), name= 'money'),
-    path('update_money/', views.UpdateMoneyView.as_view(), name='update_money'),
+    path('update_money/', api_views.EarnMoneyView.as_view(), name='update_money'),
     path('about/', views.about_view.as_view(), name='about'),
     path('search/', views.products_view.as_view(), name='search'),
     path('inventory/', views.InventoryView.as_view(), name='inventory'),
