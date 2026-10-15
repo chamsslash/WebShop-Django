@@ -23,8 +23,8 @@
 ## Запуск на Mac (первый раз)
 
 ```bash
-git clone https://github.com/chamsslash/WebShop.git
-cd WebShop/WeBs-main/chamsslash     # дальше все команды выполняются отсюда (здесь лежит manage.py)
+git clone https://github.com/chamsslash/WebShop-Django.git
+cd WebShop-Django/WeBs-main/chamsslash   # дальше все команды выполняются отсюда (здесь лежит manage.py)
 
 python3 -m venv .venv               # создать виртуальное окружение (папка .venv)
 source .venv/bin/activate           # активировать его: в начале строки появится (.venv)
@@ -33,8 +33,6 @@ python manage.py migrate            # создать таблицы в БД
 python manage.py seed               # залить тестовые данные
 python manage.py runserver          # запустить сервер
 ```
-
-В истории git остались тяжёлые гифки (~130 МБ), поэтому `git clone` может идти несколько минут.
 
 Когда появится строка `Starting development server at http://127.0.0.1:8000/`, откройте в браузере http://127.0.0.1:8000/api/docs/.
 
@@ -45,7 +43,7 @@ python manage.py runserver          # запустить сервер
 ## Запуск на Mac (последующие разы)
 
 ```bash
-cd путь/до/WebShop/WeBs-main/chamsslash
+cd путь/до/WebShop-Django/WeBs-main/chamsslash
 source .venv/bin/activate
 python manage.py runserver
 ```
@@ -186,8 +184,8 @@ media/           загруженные картинки товаров и ав�
 3. В **PowerShell**:
 
 ```powershell
-git clone https://github.com/chamsslash/WebShop.git
-cd WebShop\WeBs-main\chamsslash
+git clone https://github.com/chamsslash/WebShop-Django.git
+cd WebShop-Django\WeBs-main\chamsslash
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
